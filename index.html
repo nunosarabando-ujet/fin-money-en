@@ -7,8 +7,10 @@
     
     <!-- Lucide for modern fintech icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
-    <!-- PDF.js LEGACY build - compatível com iOS Safari -->
-      <script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/legacy/build/pdf.min.js"></script>
+    
+    <!-- PDF.js LEGACY build - compatible with mobile & iOS Safari for Co-Browse rendering -->
+    <script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/legacy/build/pdf.min.js"></script>
+    
     <!-- COBROWSE.IO INTEGRATION SCRIPT -->
     <script type="text/javascript">
         var urlParams = new URLSearchParams(window.location.search);
@@ -17,9 +19,21 @@
         s=document.createElement(t);s.src='https://js.cobrowse.io/CobrowseIO.js';s.async=1;
         e=document.getElementsByTagName(t)[0];e.parentNode.insertBefore(s,e);s.onload=function()
         {r(w[c]);};}return p;}};});})(window,'script','CobrowseIO');
+
         // Configures dynamic license & API URL parsing (falls back to Waystar demo tenant)
         CobrowseIO.license = urlParams.get('license') || '0Blc4UGxQHHDNA'; 
         CobrowseIO.api = urlParams.get('api') || 'https://api.cobrowse.io';
+        
+        // CO-BROWSE PDF LINK RULES (Consolidated active list for demos)
+        // links in your website ending with the .pdf extension
+        // CobrowseIO.pdfLinks = ['*.pdf']
+
+        // links to the example.com domain with the path starting with /assets/pdfs/
+        // CobrowseIO.pdfLinks = ['https://example.com/assets/pdfs/*']
+
+        // links to any domain with /pdfs/ as part of the path and the .pdf extension
+        // CobrowseIO.pdfLinks = ['*/pdfs/*.pdf']
+        CobrowseIO.pdfLinks = ['*.pdf', 'https://example.com/assets/pdfs/*', '*/pdfs/*.pdf'];
 
         CobrowseIO.client().then(function(){
             CobrowseIO.start({allowIFrameStart:true});
@@ -69,6 +83,7 @@
         }
         
         var pdfRendered = false;
+
         // Switch Tabs inside Statement Modal
         function switchInvoiceTab(tabName) {
             const htmlTab = document.getElementById('tab-html-btn');
@@ -87,82 +102,83 @@
                 htmlContent.classList.add('hidden');
                 pdfContent.classList.remove('hidden');
                 
+                // Renders PDF dynamically using PDF.js onto Canvases so UJET agent can see it over Co-Browse
                 if (!pdfRendered) {
-                      renderPdfToCanvas('Fatura%20Voltora%20Demo.pdf');
-                      pdfRendered = true;
-                  }
-                
-                // Resolve and render the PDF viewer optimized for mobile devices
-                setupMobilePdfViewer();
+                    renderPdfToCanvas('Fin_Statement_Demo.pdf');
+                    pdfRendered = true;
+                }
             }
         }
 
-        // Mobile Friendly PDF Fallback Renderer
-        function setupMobilePdfViewer() {
-            const container = document.getElementById('invoice-pdf-content');
-            const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-            
-            const pdfRelativePath = "Fin_Statement_Demo.pdf";
-            
-            // Safe URL resolution protecting against non-hierarchical protocols like blob: or about:
-            let pdfAbsoluteUrl = pdfRelativePath;
-            try {
-                if (window.location.protocol === 'http:' || window.location.protocol === 'https:') {
-                    pdfAbsoluteUrl = new URL(pdfRelativePath, window.location.href).href;
-                } else {
-                    pdfAbsoluteUrl = (window.location.origin || '') + '/' + pdfRelativePath;
-                }
-            } catch (e) {
-                pdfAbsoluteUrl = (window.location.origin || '') + '/' + pdfRelativePath;
-            }
-            
-            const isLocal = window.location.hostname === 'localhost' || 
-                            window.location.hostname === '127.0.0.1' || 
-                            window.location.protocol === 'file:';
+        // Render PDF directly to HTML5 Canvas for absolute Co-browse compatibility on mobile & web
+        async function renderPdfToCanvas(url) {
+            const container = document.getElementById('pdf-canvas-container');
+            container.innerHTML = '<p style="text-align:center; padding:40px; color: var(--slate-500);">Loading statement...</p>';
 
-            if (isMobile && !isLocal) {
-                // Inline rendering via Google Gview for Mobile live setups
+            try {
+                pdfjsLib.GlobalWorkerOptions.workerSrc =
+                    'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/legacy/build/pdf.worker.min.js';
+
+                const pdf = await pdfjsLib.getDocument(url).promise;
+                container.innerHTML = '';
+        
+                // Limit canvas area on iOS (~16M pixels = 4096x4096 limit)
+                const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+                const MAX_CANVAS_PIXELS = isIOS ? 16777216 : 33554432;
+
+                for (let i = 1; i <= pdf.numPages; i++) {
+                    const page = await pdf.getPage(i);
+        
+                    // Display Scale calculations
+                    const containerWidth = container.clientWidth - 32;
+                    const unscaledViewport = page.getViewport({ scale: 1 });
+                    const displayScale = Math.min(2, containerWidth / unscaledViewport.width);
+                    const viewport = page.getViewport({ scale: displayScale });
+
+                    // Retina Display Support (sharp rendering)
+                    let outputScale = window.devicePixelRatio || 1;
+
+                    // If memory store area exceeds iOS limits, scale back safely
+                    const desiredArea = viewport.width * viewport.height * outputScale * outputScale;
+                    if (desiredArea > MAX_CANVAS_PIXELS) {
+                        outputScale = outputScale * Math.sqrt(MAX_CANVAS_PIXELS / desiredArea);
+                    }
+
+                    const canvas = document.createElement('canvas');
+                    canvas.width = Math.floor(viewport.width * outputScale);
+                    canvas.height = Math.floor(viewport.height * outputScale);
+                    
+                    canvas.style.cssText = `
+                        display:block;
+                        margin:0 auto 16px;
+                        width:${Math.floor(viewport.width)}px;
+                        height:${Math.floor(viewport.height)}px;
+                        max-width:100%;
+                        box-shadow:var(--shadow-lg);
+                        border-radius:8px;
+                        background:white;
+                    `;
+                    container.appendChild(canvas);
+
+                    const transform = outputScale !== 1
+                        ? [outputScale, 0, 0, outputScale, 0, 0]
+                        : null;
+
+                    await page.render({
+                        canvasContext: canvas.getContext('2d'),
+                        transform: transform,
+                        viewport: viewport
+                    }).promise;
+                }
+            } catch (err) {
+                console.error('Failed to render PDF to Canvas:', err);
                 container.innerHTML = `
-                    <div class="pdf-embed-container">
-                        <iframe src="https://docs.google.com/gview?url=${encodeURIComponent(pdfAbsoluteUrl)}&embedded=true" 
-                                width="100%" height="100%" style="border: none;">
-                        </iframe>
+                    <div style="padding:40px; text-align:center; color: var(--slate-600);">
+                        <h4 style="font-weight:800; font-size:16px; margin-bottom:8px;">Unable to display Statement PDF</h4>
+                        <p style="margin-bottom: 16px; font-size: 13px;">Please download the statement directly to review details:</p>
+                        <a href="${url}" download class="btn btn-primary" style="display:inline-flex;">Download Statement PDF</a>
                     </div>
                 `;
-            } else if (isMobile && isLocal) {
-                // Local testing on mobile layout warning
-                container.innerHTML = `
-                    <div class="pdf-embed-container" style="background-color: var(--slate-50); display: flex; align-items: center; justify-content: center;">
-                        <div class="pdf-fallback-message">
-                            <i data-lucide="alert-triangle" style="width: 48px; height: 48px; color: var(--orange); margin: 0 auto 16px;"></i>
-                            <h4 style="font-weight: 800; font-size: 16px; margin-bottom: 8px;">Local Preview Not Available on Mobile</h4>
-                            <p style="margin-bottom: 16px; font-size: 13px;">Mobile PDF rendering requires the website to be hosted online (e.g., GitHub Pages). You can download the statement PDF manually to view:</p>
-                            <a href="${pdfRelativePath}" download class="btn btn-primary" style="margin: 0 auto; display: inline-flex;">
-                                <i data-lucide="download"></i> Download Statement PDF
-                            </a>
-                        </div>
-                    </div>
-                `;
-                if (typeof lucide !== 'undefined') lucide.createIcons();
-            } else {
-                // Default Desktop Object rendering
-                container.innerHTML = `
-                    <div class="pdf-embed-container">
-                        <object data="${pdfRelativePath}" type="application/pdf" width="100%" height="100%">
-                            <iframe src="${pdfRelativePath}" width="100%" height="100%" style="border: none;">
-                                <div class="pdf-fallback-message">
-                                    <i data-lucide="alert-triangle" style="width: 48px; height: 48px; color: var(--orange); margin: 0 auto 16px;"></i>
-                                    <h4 style="font-weight: 800; font-size: 16px; margin-bottom: 8px;">Your browser does not support inline PDFs</h4>
-                                    <p style="margin-bottom: 16px;">Please use the link below to download and view your digital statement:</p>
-                                    <a href="${pdfRelativePath}" download class="btn btn-primary" style="margin: 0 auto; display: inline-flex;">
-                                        <i data-lucide="download"></i> Download Statement PDF
-                                    </a>
-                                </div>
-                            </iframe>
-                        </object>
-                    </div>
-                `;
-                if (typeof lucide !== 'undefined') lucide.createIcons();
             }
         }
     </script>
@@ -876,6 +892,12 @@
             color: var(--slate-600);
         }
 
+        #pdf-canvas-container {
+            padding: 16px;
+            background-color: var(--slate-100);
+            min-height: 400px;
+        }
+
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
@@ -1184,9 +1206,9 @@
                     </div>
                 </div>
 
-                <!-- Aba de Visualização Dinâmica do PDF (Compatível com Android) -->
+                <!-- Aba de Visualização Dinâmica do PDF (Compatível com Android & Co-Browse) -->
                 <div id="invoice-pdf-content" class="hidden">
-                    <!-- Conteúdo dinâmico preenchido pela função setupMobilePdfViewer() -->
+                    <div id="pdf-canvas-container"></div>
                 </div>
             </div>
         </div>
