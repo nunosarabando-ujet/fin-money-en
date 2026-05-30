@@ -33,7 +33,7 @@
 
         // links to any domain with /pdfs/ as part of the path and the .pdf extension
         // CobrowseIO.pdfLinks = ['*/pdfs/*.pdf']
-        CobrowseIO.pdfLinks = ['*.pdf', 'https://example.com/assets/pdfs/*', '*/pdfs/*.pdf'];
+//        CobrowseIO.pdfLinks = ['*.pdf', 'https://example.com/assets/pdfs/*', '*/pdfs/*.pdf'];
 
         CobrowseIO.client().then(function(){
             CobrowseIO.start({allowIFrameStart:true});
@@ -879,19 +879,6 @@
         }
 
         /* Embedded PDF Containers */
-        .pdf-embed-container {
-            width: 100%;
-            height: 600px;
-            border-radius: 0 0 24px 24px;
-            overflow: hidden;
-        }
-        
-        .pdf-fallback-message {
-            padding: 60px 40px;
-            text-align: center;
-            color: var(--slate-600);
-        }
-
         #pdf-canvas-container {
             padding: 16px;
             background-color: var(--slate-100);
