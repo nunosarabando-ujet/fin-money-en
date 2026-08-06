@@ -23,17 +23,6 @@
         // Configures dynamic license & API URL parsing (falls back to Waystar demo tenant)
         CobrowseIO.license = urlParams.get('license') || '0Blc4UGxQHHDNA'; 
         CobrowseIO.api = urlParams.get('api') || 'https://api.cobrowse.io';
-        
-        // CO-BROWSE PDF LINK RULES (Consolidated active list for demos)
-        // links in your website ending with the .pdf extension
-        // CobrowseIO.pdfLinks = ['*.pdf']
-
-        // links to the example.com domain with the path starting with /assets/pdfs/
-        // CobrowseIO.pdfLinks = ['https://example.com/assets/pdfs/*']
-
-        // links to any domain with /pdfs/ as part of the path and the .pdf extension
-        // CobrowseIO.pdfLinks = ['*/pdfs/*.pdf']
-//        CobrowseIO.pdfLinks = ['*.pdf', 'https://example.com/assets/pdfs/*', '*/pdfs/*.pdf'];
 
         CobrowseIO.client().then(function(){
             CobrowseIO.start({allowIFrameStart:true});
@@ -245,7 +234,7 @@
 
         /* --- NAVIGATION --- */
         nav {
-            background: rgba(255, 255, 255, 0.8);
+            background: rgba(255, 255, 255, 0.85);
             backdrop-filter: blur(12px);
             border-bottom: 1px solid var(--slate-100);
             position: sticky;
@@ -289,6 +278,14 @@
         }
 
         .nav-link:hover { color: var(--primary); }
+        
+        .nav-link.active-faq {
+            color: var(--primary);
+            background-color: var(--primary-light);
+            padding: 6px 14px;
+            border-radius: 99px;
+            border: 1px solid rgba(90, 42, 251, 0.2);
+        }
 
         /* --- BUTTONS --- */
         .btn {
@@ -395,17 +392,6 @@
             position: relative;
         }
 
-        .usage-card {
-            background-color: var(--white);
-            padding: 32px;
-            border-radius: 24px;
-            box-shadow: var(--shadow-xl);
-            width: 100%;
-            transform: rotate(3deg);
-            position: relative;
-            z-index: 10;
-        }
-
         /* Interactive Card Mockup */
         .movo-card-container {
             width: 100%;
@@ -478,6 +464,118 @@
 
         .feature-title { font-size: 24px; font-weight: 900; margin: 0; color: var(--dark-bg); }
         .feature-text { color: var(--slate-500); font-weight: 500; margin: 0; }
+
+        /* --- FAQ SECTION (UJET CCAAS DEFLECTION HARNESS) --- */
+        .faq-section {
+            background-color: var(--white);
+            padding: 96px 0;
+            border-bottom: 1px solid var(--slate-200);
+            scroll-margin-top: 80px; /* Offset for sticky nav */
+        }
+
+        .faq-header {
+            text-align: center;
+            max-width: 640px;
+            margin: 0 auto 64px auto;
+        }
+
+        .faq-header h2 {
+            font-size: 40px;
+            font-weight: 900;
+            color: var(--dark-bg);
+            margin: 0 0 16px 0;
+            letter-spacing: -0.03em;
+        }
+
+        .faq-header p {
+            font-size: 18px;
+            color: var(--slate-500);
+            font-weight: 500;
+            margin: 0;
+        }
+
+        .faq-grid {
+            max-width: 860px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .faq-item {
+            border: 1.5px solid var(--slate-200);
+            border-radius: 16px;
+            overflow: hidden;
+            background: var(--white);
+            transition: all 0.2s ease;
+        }
+
+        .faq-item[open] {
+            border-color: var(--primary);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .faq-summary {
+            padding: 24px;
+            font-size: 18px;
+            font-weight: 800;
+            color: var(--slate-900);
+            cursor: pointer;
+            list-style: none;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            user-select: none;
+        }
+
+        .faq-summary::-webkit-details-marker { display: none; }
+
+        .faq-icon-toggle {
+            width: 24px;
+            height: 24px;
+            color: var(--primary);
+            transition: transform 0.2s ease;
+            flex-shrink: 0;
+        }
+
+        .faq-item[open] .faq-icon-toggle {
+            transform: rotate(180deg);
+        }
+
+        .faq-content {
+            padding: 0 24px 24px 24px;
+            color: var(--slate-600);
+            font-size: 15px;
+            font-weight: 500;
+            line-height: 1.6;
+            border-top: 1px solid var(--slate-100);
+            margin-top: 4px;
+            padding-top: 16px;
+        }
+
+        .faq-content ul {
+            margin: 8px 0;
+            padding-left: 20px;
+        }
+
+        .faq-content li {
+            margin-bottom: 6px;
+        }
+
+        .faq-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background-color: var(--green-50);
+            color: var(--green-600);
+            border: 1px solid #bbf7d0;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 800;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+        }
 
         /* --- PLANNER --- */
         .planner {
@@ -687,7 +785,6 @@
             color: var(--slate-900);
         }
 
-        /* Statement Viewer Tab Layout Styling */
         .invoice-tabs {
             display: flex;
             background-color: var(--slate-100);
@@ -799,7 +896,6 @@
             color: var(--primary);
         }
 
-        /* Statement Detail Table */
         .invoice-table {
             width: 100%;
             border-collapse: collapse;
@@ -878,7 +974,6 @@
             margin-top: 24px;
         }
 
-        /* Embedded PDF Containers */
         #pdf-canvas-container {
             padding: 16px;
             background-color: var(--slate-100);
@@ -901,7 +996,7 @@
 </head>
 <body>
 
-    <!-- Navigation Header -->
+    <!-- Navigation Header with FAQ Direct Link -->
     <nav>
         <div class="container flex justify-between items-center">
             <a href="#" class="logo">
@@ -910,11 +1005,14 @@
             <div class="nav-links gap-10 items-center">
                 <a href="#solutions" class="nav-link">Features</a>
                 <a href="#planner" class="nav-link">AI Smart Budget</a>
+                <!-- Direct FAQ Link -->
+                <a href="#faqs" class="nav-link active-faq">
+                    <i data-lucide="help-circle" style="width: 14px; height: 14px; vertical-align: middle;"></i> FAQs
+                </a>
                 <a href="#cobrowse" class="nav-link">Screen Share Support</a>
                 <a href="javascript:void(0)" onclick="openInvoice()" class="nav-link" style="color: var(--primary); font-weight: 800; display: flex; align-items: center; gap: 4px;">
                     <i data-lucide="file-text" style="width: 16px; height: 16px;"></i> My Statement
                 </a>
-                <a href="#" class="nav-link">Support</a>
             </div>
             <button class="btn btn-primary" onclick="openInvoice()">View Statement</button>
         </div>
@@ -933,7 +1031,7 @@
                 </p>
                 <div class="flex gap-4">
                     <button class="btn btn-primary btn-large" onclick="openInvoice()"><i data-lucide="file-text"></i> Open Statement ($76.98)</button>
-                    <a href="#cobrowse" class="btn btn-secondary btn-large">Co-Browse Support</a>
+                    <a href="#faqs" class="btn btn-secondary btn-large">Quick Help & FAQs</a>
                 </div>
             </div>
             
@@ -987,6 +1085,96 @@
                     <h3 class="feature-title">Automated AI Saving Alerts</h3>
                     <p class="feature-text">Get smart alerts before high-charge periods and automatically optimize your monthly budget plan.</p>
                 </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ SECTION -->
+    <section id="faqs" class="faq-section">
+        <div class="container">
+            <div class="faq-header">
+                <div class="faq-badge">
+                    <i data-lucide="shield-check" style="width: 14px; height: 14px;"></i> Self-Service Help Center
+                </div>
+                <h2>Frequently Asked Questions</h2>
+                <p>Find instant answers to common FIN Money account, statement, and security queries before connecting with an agent.</p>
+            </div>
+
+            <div class="faq-grid">
+                <!-- FAQ Item 1 -->
+                <details class="faq-item" open>
+                    <summary class="faq-summary">
+                        <span>How do I view and download my monthly card statement?</span>
+                        <i data-lucide="chevron-down" class="faq-icon-toggle"></i>
+                    </summary>
+                    <div class="faq-content">
+                        You can view your current or past statements directly in the app or web portal:
+                        <ul>
+                            <li>Click on the <strong>"View Statement"</strong> button located at the top navigation bar.</li>
+                            <li>Switch between the <strong>Digital View (HTML)</strong> for quick breakdowns or the <strong>View PDF Original</strong> for official record keeping.</li>
+                            <li>Statements update automatically on the 5th of every calendar month.</li>
+                        </ul>
+                    </div>
+                </details>
+
+                <!-- FAQ Item 2 -->
+                <details class="faq-item">
+                    <summary class="faq-summary">
+                        <span>How do virtual cards work and how do I create one on-demand?</span>
+                        <i data-lucide="chevron-down" class="faq-icon-toggle"></i>
+                    </summary>
+                    <div class="faq-content">
+                        Virtual cards shield your physical account details during online transactions:
+                        <ul>
+                            <li>Navigate to the <strong>Virtual Cards</strong> tab in your FIN Money mobile dashboard.</li>
+                            <li>Tap <strong>"Create New Virtual Card"</strong> and set a spending limit or single-use rule.</li>
+                            <li>Virtual cards activate instantly and can be frozen or terminated at any time.</li>
+                        </ul>
+                    </div>
+                </details>
+
+                <!-- FAQ Item 3 -->
+                <details class="faq-item">
+                    <summary class="faq-summary">
+                        <span>Is my account data safe during live Co-Browsing support sessions?</span>
+                        <i data-lucide="chevron-down" class="faq-icon-toggle"></i>
+                    </summary>
+                    <div class="faq-content">
+                        Yes, Co-Browsing is built with enterprise-grade privacy protections:
+                        <ul>
+                            <li>Agents can only see the current FIN Money web browser window.</li>
+                            <li>Sensitive inputs (such as passwords, SSN, and full credit card numbers) are automatically masked and hidden from support personnel.</li>
+                            <li>You can end the live session at any time by clicking "End Session".</li>
+                        </ul>
+                    </div>
+                </details>
+
+                <!-- FAQ Item 4 -->
+                <details class="faq-item">
+                    <summary class="faq-summary">
+                        <span>What should I do if I spot an unrecognized charge on my account?</span>
+                        <i data-lucide="chevron-down" class="faq-icon-toggle"></i>
+                    </summary>
+                    <div class="faq-content">
+                        If you notice a transaction you didn't authorize:
+                        <ul>
+                            <li>Instantly freeze the card associated with the charge via your account dashboard.</li>
+                            <li>Open your statement details and select <strong>"Dispute Transaction"</strong> next to the itemized line fee.</li>
+                            <li>Our automated fraud defense team will issue a temporary credit while investigating within 3–5 business days.</li>
+                        </ul>
+                    </div>
+                </details>
+
+                <!-- FAQ Item 5 -->
+                <details class="faq-item">
+                    <summary class="faq-summary">
+                        <span>How long do ACH transfers and direct deposit settlements take?</span>
+                        <i data-lucide="chevron-down" class="faq-icon-toggle"></i>
+                    </summary>
+                    <div class="faq-content">
+                        Standard ACH transfers typically process within 1 to 2 business days. Direct deposits (such as payroll) are made available as soon as received, often up to 2 days faster than traditional financial institutions.
+                    </div>
+                </details>
             </div>
         </div>
     </section>
@@ -1054,7 +1242,6 @@
             <div class="invoice-scrollable-body">
                 <!-- HTML replica tab -->
                 <div id="invoice-html-content" class="invoice-paper">
-                    <!-- Header of the Document -->
                     <div class="invoice-brand-row">
                         <div>
                             <div class="logo" style="margin-bottom: 8px;">
@@ -1078,7 +1265,6 @@
                         </div>
                     </div>
 
-                    <!-- Grelha de Informação do Cliente -->
                     <div class="invoice-grid-meta">
                         <div class="meta-box">
                             <p class="meta-box-title">Account Details</p>
@@ -1102,7 +1288,6 @@
                         </div>
                     </div>
 
-                    <!-- Caixa de Valor Total -->
                     <div class="invoice-amount-summary">
                         <div>
                             <div class="invoice-amount-text">Total Outstanding Balance</div>
@@ -1111,7 +1296,6 @@
                         <div class="invoice-amount-value">$76.98</div>
                     </div>
 
-                    <!-- Tabela de Detalhe -->
                     <h4 style="font-size: 14px; font-weight: 900; margin-bottom: 12px;">Statement Detail Breakdown</h4>
                     <table class="invoice-table">
                         <thead>
@@ -1174,7 +1358,6 @@
                         </tbody>
                     </table>
 
-                    <!-- Bloco de Pagamento Multibanco -->
                     <div class="multibanco-container">
                         <div class="mb-logo-box">ACH</div>
                         <div class="mb-details">
@@ -1189,11 +1372,10 @@
                     </div>
 
                     <div class="invoice-test-banner">
-                        DEMO EVALUATION DOCUMENT: Produced exclusively for technical evaluation within UJET active demo environments. No legal or tax value.
+                        DEMO EVALUATION DOCUMENT: Produced exclusively for technical evaluation within active demo environments. No legal or tax value.
                     </div>
                 </div>
 
-                <!-- Aba de Visualização Dinâmica do PDF (Compatível com Android & Co-Browse) -->
                 <div id="invoice-pdf-content" class="hidden">
                     <div id="pdf-canvas-container"></div>
                 </div>
@@ -1208,10 +1390,10 @@
     </footer>
 
     <script>
-        // Inicializar ícones Lucide
+        // Initialize Lucide Icons
         if (typeof lucide !== 'undefined') lucide.createIcons();
 
-        // Configuração da API Gemini
+        // Gemini API configuration
         const apiKey = ""; 
         const API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent";
 
